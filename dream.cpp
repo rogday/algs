@@ -21,8 +21,8 @@ int main() {
 	istream_iterator<int> inst(cin);
 	int n = *(inst++), k = *(inst++);
 
-	vector<int> vec;
-	copy_n(inst, n, back_inserter(vec));
+	vector<int> vec(n);
+	copy_n(inst, n, vec.begin());
 	count_sort(vec);
 
 	int msum = 0, sum;
