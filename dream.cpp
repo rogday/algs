@@ -1,28 +1,37 @@
 #include <algorithm>
+#include <ctime>
 #include <iostream>
 #include <iterator>
+#include <numeric>
 #include <vector>
 
 using namespace std;
 
 int main() {
-	istream_iterator<int> inst(cin);
-	int n = *(inst++), k = *(inst++);
+	int n = 1e5;
+	int k = 42;
 
-	vector<int> vec(n);
-	copy_n(inst, n, vec.begin());
+	vector<int> vec(n + 1);
+
+	for (auto& i : vec)
+		i = rand() % 1000;
+
+	vec[0] = 0;
+
 	sort(vec.begin(), vec.end());
+	partial_sum(vec.begin(), vec.end(), vec.begin());
 
-	int msum = 0, sum;
+	int msum = 0;
 
-	for (int i = 0; i < n - 1; ++i)	{
-		sum = vec[i] + vec[i + 1];
+	for (int i = 1, j = 3; j <= n;)	{
+		while ((j <= n) && (vec[j] - vec[j - 1] <= vec[i + 1] - vec[i - 1] + k))
+			++j;
 
-		for (int j = i + 2; (j < n) && (vec[j] <= vec[i] + vec[i + 1] + k); ++j)
-			sum += vec[j];
+		if (vec[j - 1] - vec[i - 1] > msum)
+			msum = vec[j - 1] - vec[i - 1];
 
-		if (sum > msum)
-			msum = sum;
+		while ((i + 1 < j) && (vec[j] - vec[j - 1] > vec[i + 1] - vec[i - 1] + k))
+			++i;
 	}
 
 	cout << msum << endl;
