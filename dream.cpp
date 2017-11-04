@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <ctime>
 #include <iostream>
-#include <iterator>
 #include <numeric>
 #include <vector>
 
@@ -13,11 +12,7 @@ int main() {
 
 	vector<int> vec(n + 1);
 
-	for (auto& i : vec)
-		i = rand() % 1000;
-
-	vec[0] = 0;
-
+	generate(vec.begin() + 1, vec.end(), []() {return rand() % 1000;});
 	sort(vec.begin(), vec.end());
 	partial_sum(vec.begin(), vec.end(), vec.begin());
 
@@ -30,7 +25,7 @@ int main() {
 		if (vec[j - 1] - vec[i - 1] > msum)
 			msum = vec[j - 1] - vec[i - 1];
 
-		while ((i + 1 < j) && (vec[j] - vec[j - 1] > vec[i + 1] - vec[i - 1] + k))
+		while ((i < j) && (vec[j] - vec[j - 1] > vec[i + 1] - vec[i - 1] + k))
 			++i;
 	}
 
