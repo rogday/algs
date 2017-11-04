@@ -7,16 +7,12 @@
 using namespace std;
 
 int main() {
-	int n = 1e5;
-	int k = 42;
-
+	int n = 1e5, k = 42, msum = 0;
 	vector<int> vec(n + 1);
 
 	generate(vec.begin() + 1, vec.end(), []() {return rand() % 1000;});
 	sort(vec.begin(), vec.end());
 	partial_sum(vec.begin(), vec.end(), vec.begin());
-
-	int msum = 0;
 
 	for (int i = 1, j = 3; j <= n;)	{
 		while ((j <= n) && (vec[j] - vec[j - 1] <= vec[i + 1] - vec[i - 1] + k))
