@@ -1,5 +1,5 @@
 #include <algorithm>
-#include <ctime>
+#include <random>
 #include <iostream>
 #include <numeric>
 #include <vector>
