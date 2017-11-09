@@ -1,7 +1,5 @@
-#include <forward_list>
 #include <string>
 #include <vector>
-#include <tuple>
 #include <ostream>
 #include <iomanip>
 
@@ -16,8 +14,12 @@ private:
 		int len = str.size();
 
 		unsigned int out = 0;
-		for (int i = 0; i < len; ++i)
-			out += out ^ str[i];
+		int shift = 0;
+
+		for (int i = 0; i < len; ++i) {
+			out ^= str[i] << shift;
+			shift = (shift + 7) % 32;
+		}
 
 		return out;
 	}
@@ -27,6 +29,7 @@ public:
 
 	bool& operator[](std::string str) {
 		int ind = hash(str) % n;
+
 		int off = 0;
 		while (off != n && !table[ind].first.empty()) {
 			++off;
@@ -38,7 +41,13 @@ public:
 		return table[ind].second;
 	}
 
-	int getCollisions() {return collisions;	}
+	int getCollisions() const {return collisions;	}
+
+	void clear() {
+		table.clear();
+		table.resize(n);
+		collisions = 0;
+	}
 
 	friend std::ostream& operator<<(std::ostream& strm, Hash& tbl) {
 		int c = -1;
