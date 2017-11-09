@@ -44,6 +44,12 @@ public:
 
 	int getCollisions() {return collisions;	}
 
+	void clear() {
+		table.clear();
+		table.resize(n);
+		collisions = 0;
+	}
+
 	friend std::ostream& operator<<(std::ostream& strm, Hash_chained& tbl) {
 		int c = -1;
 		for (auto& i : tbl.table) {
