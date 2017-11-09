@@ -16,8 +16,12 @@ private:
 		int len = str.size();
 
 		unsigned int out = 0;
-		for (int i = 0; i < len; ++i)
-			out += out ^ str[i];
+		int shift = 0;
+
+		for (int i = 0; i < len; ++i) {
+			out ^= str[i] << shift;
+			shift = (shift + 7) % 32;
+		}
 
 		return out;
 	}
