@@ -1,41 +1,34 @@
-#include <iostream>
-#include <iomanip>
-#include <chrono>
 #include <stack>
+#include <random>
+#include <algorithm>
+#include <SFML/Graphics.hpp>
 
+using namespace sf;
 using namespace std;
 
-int n = 14;
-int m = 16;
+const int n = 14;
+const int m = 16;
 
-int grens = 0;
+typedef array < array < int, m + 2 >, n + 2 > Map;
 
-int** arr;
-int** printarr;
-int*** sarr;
+int grens = 4;
 
-int x0 = 5;
-int y0 = 1;
+Map arr;
+Map printarr;
+vector<Map> sarr;
+
+int x0 = 1;
+int my_y0 = 1;
 int x1 = n;
-int y1 = m;
+int my_y1 = m;
 
 int dx[4] = {1, 0, -1, 0};
 int dy[4] = {0, 1, 0, -1};
 
-struct Node {
-	int lvl;
-	int x;
-	int y;
-};
-
 void generate() {
-	arr = new int*[n + 2 ];
-	printarr = new int*[n + 2 ];
 	int tmp;
 
 	for (int i = 0; i <= n + 1; ++i) {
-		arr[i] = new int[m + 2];
-		printarr[i] = new int[m + 2];
 		for (int k = 0; k <= m + 1; ++k) {
 			tmp = rand() - RAND_MAX / 2;
 			if (i * k == 0 || i == n + 1 || k == m + 1)
@@ -44,75 +37,22 @@ void generate() {
 				arr[i][k] = n * m;
 			else
 				arr[i][k] = 0;
-			printarr[i][k] = arr[i][k];
 		}
 	}
 
-	arr[x0][y0] = 0;
-	printarr[x0][y0] = 0;
+	arr[x0][my_y0] = arr[x1][my_y1] = 0;
+	printarr = arr;
 
-	arr[x1][y1] = 0;
-	printarr[x1][y1] = 0;
-
-	sarr = new int**[grens + 1];
-	for (int i = 0; i < grens + 1; ++i) {
-		sarr[i] = new int*[n + 2];
-		for (int k = 0; k < n + 2; ++k) {
-			sarr[i][k] = new int[m + 2];
-			for (int l = 0; l < m + 2; ++l)
-				sarr[i][k][l] = arr[k][l];
-		}
-	}
+	sarr.resize(grens + 1);
+	fill(sarr.begin(), sarr.end(), arr);
 }
 
-#if defined _WIN32 || defined _WIN64
-#include <windows.h>
-
-HANDLE  hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
-void show(int** ar) {
-	cout << '\n';
-	for (int i = 0; i <= n + 1 ; ++i) {
-		for (int k = 0; k <= m + 1 ; ++k) {
-			if ((i == x0 && k == y0) || (i == x1 && k == y1))
-				SetConsoleTextAttribute(hConsole, 0x00);
-			else if (ar[i][k] >= n * m)
-				SetConsoleTextAttribute(hConsole, 0x10);
-			else if (ar[i][k] == -1)
-				SetConsoleTextAttribute(hConsole, 0x20);
-			else if (ar[i][k] == -2)
-				SetConsoleTextAttribute(hConsole, 0xE0);
-			else
-				SetConsoleTextAttribute(hConsole, 0xF0);
-
-			cout << "  ";
-		}
-		cout  << "\n";
-	}
-	cout << "\n";
-	SetConsoleTextAttribute(hConsole, 0x07);
+void flip(int x, int y) {
+	if (printarr[x][y] == 0)
+		printarr[x][y] = n * m;
+	else if (printarr[x][y] != n * m + 1)
+		printarr[x][y] = 0;
 }
-#else
-void show(int** ar) {
-	cout << '\n';
-	for (int i = 0; i <= n + 1 ; ++i) {
-		for (int k = 0; k <= m + 1 ; ++k) {
-			if ((i == x0 && k == y0) || (i == x1 && k == y1))
-				cout <<  "\e[40m  ";
-			else if (ar[i][k] >= n * m)
-				cout <<  "\e[44m  ";
-			else if (ar[i][k] == -1)
-				cout <<  "\e[42m  ";
-			else if (ar[i][k] == -2)
-				cout <<  "\e[103m  ";
-			else
-				cout << "\e[107m  ";
-		}
-		cout  << "\e[0m\n";
-	}
-	cout << "\n\e[0;0m";
-}
-#endif
 
 void calcpath(int row, int col, int lvl) {
 	int cur = sarr[lvl][row][col];
@@ -145,6 +85,12 @@ void calcpath(int row, int col, int lvl) {
 }
 
 int path(int x, int y) {
+	struct Node {
+		int lvl;
+		int x;
+		int y;
+	};
+
 	int s = 1;
 	stack<Node> stk_1;
 	stack<Node> stk_2;
@@ -163,7 +109,7 @@ int path(int x, int y) {
 			t = stk_1.top();
 			stk_1.pop();
 
-			if (t.x == x0 && t.y == y0) {
+			if (t.x == x0 && t.y == my_y0) {
 				if (olvl > t.lvl)
 					olvl = t.lvl;
 				exit = true;
@@ -190,42 +136,78 @@ int path(int x, int y) {
 	return olvl;
 }
 
-void magic() {
-	auto t1 = chrono::system_clock::now();
-	int lvl = path(x1, y1);
-	auto t2 = chrono::system_clock::now();
+void show() {
+	VideoMode vm = VideoMode::getDesktopMode();
 
-	chrono::duration<double> elapsed = t2 - t1;
+	int size = min(vm.width, vm.height) * 2 / (max(m + 2, n + 2) * 3);
 
-	if (lvl != grens + 1) {
-		calcpath(x0, y0, lvl);
-		show(printarr);
-		cout << "We'd found shortest path using " << lvl << " grenades, length is " << sarr[lvl][x0][y0] - 1 << "." << endl << "Elapsed time: " << elapsed.count() << " sec." << endl;
-	} else {
-		show(arr);
-		cout << "It seems like path doesnt exist :c" << endl;
+	RenderWindow window(VideoMode(size * (m + 2), size * (n + 2)), "Maze with grenades.");
+	window.setPosition(Vector2i(vm.width / 4, vm.height / 4));
+	Event event;
+
+	RectangleShape rects[n + 2][m + 2];
+
+	bool restart = true;
+
+	while (window.isOpen())	{
+
+		while (window.pollEvent(event))	{
+			switch (event.type) {
+			case  Event::Closed:
+				window.close();
+				break;
+
+			case Event::MouseButtonPressed:
+				if (event.mouseButton.button == Mouse::Left) {
+					if (!restart) {
+						printarr = arr;
+						restart = true;
+					}
+					flip(event.mouseButton.y / size, event.mouseButton.x / size);
+				} else if (event.mouseButton.button == Mouse::Right && restart) {
+					restart = false;
+
+					arr = printarr;
+					fill(sarr.begin(), sarr.end(), arr);
+
+					int lvl = path(x1, my_y1);
+
+					if (lvl != grens + 1)
+						calcpath(x0, my_y0, lvl);
+				}
+				break;
+			}
+		}
+
+		window.clear(Color::Black);
+
+		for (int i = 0; i < n + 2; ++i)
+			for (int k = 0; k < m + 2; ++k) {
+				rects[i][k] = RectangleShape(Vector2f(size, size));
+				rects[i][k].setPosition(size * k , size * i  );
+
+				Color clr;
+
+				if ((i == x0 && k == my_y0) || (i == x1 && k == my_y1))
+					clr = Color::Black;
+				else if (printarr[i][k] >= n * m)
+					clr = Color::Blue;
+				else if (printarr[i][k] == -1)
+					clr = Color::Green;
+				else if (printarr[i][k] == -2)
+					clr = Color::Yellow;
+				else
+					clr = Color::White;
+				rects[i][k].setFillColor(clr);
+				window.draw(rects[i][k]);
+			}
+
+		window.display();
 	}
 }
 
 int main(int num, char* str[]) {
 	srand(time(nullptr));
-
-	if (num == 2)
-		grens = atoi(str[1]);
-	if (num >= 4) {
-		grens = atoi(str[1]);
-		n = atoi(str[2]);
-		m = atoi(str[3]);
-		x1 = n;
-		y1 = m;
-		if (num == 7) {
-			x0 = atoi(str[4]);
-			y0 = atoi(str[5]);
-			x1 = atoi(str[6]);
-			y1 = atoi(str[7]);
-		}
-	};
-
 	generate();
-	magic();
+	show();
 }
