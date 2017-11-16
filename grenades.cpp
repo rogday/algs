@@ -54,6 +54,15 @@ void flip(int x, int y) {
 		printarr[x][y] = 0;
 }
 
+void wall(int x, int y) {
+	printarr[x][y] = n * m;
+}
+
+void empty(int x, int y) {
+	if (printarr[x][y] != n * m + 1)
+		printarr[x][y] = 0;
+}
+
 void calcpath(int row, int col, int lvl) {
 	int cur = sarr[lvl][row][col];
 
@@ -136,18 +145,53 @@ int path(int x, int y) {
 	return olvl;
 }
 
+void update(RenderWindow& window, RectangleShape rects[n + 2][m + 2]) {
+	window.clear(Color::Black);
+
+	for (int i = 0; i < n + 2; ++i)
+		for (int k = 0; k < m + 2; ++k) {
+			Color clr;
+
+			if ((i == x0 && k == my_y0) || (i == x1 && k == my_y1))
+				clr = Color::Black;
+			else if (printarr[i][k] >= n * m)
+				clr = Color::Blue;
+			else if (printarr[i][k] == -1)
+				clr = Color::Green;
+			else if (printarr[i][k] == -2)
+				clr = Color::Yellow;
+			else
+				clr = Color::White;
+
+			rects[i][k].setFillColor(clr);
+			window.draw(rects[i][k]);
+		}
+
+	window.display();
+}
+
 void show() {
 	VideoMode vm = VideoMode::getDesktopMode();
 
 	int size = min(vm.width, vm.height) * 2 / (max(m + 2, n + 2) * 3);
 
-	RenderWindow window(VideoMode(size * (m + 2), size * (n + 2)), "Maze with grenades.");
+	RenderWindow window(VideoMode(size * (m + 2), size * (n + 2)), "Maze with grenades.", Style::Titlebar | Style::Close);
 	window.setPosition(Vector2i(vm.width / 4, vm.height / 4));
+	window.setKeyRepeatEnabled(true);
 	Event event;
 
 	RectangleShape rects[n + 2][m + 2];
 
 	bool restart = true;
+	bool state = true;
+
+	for (int i = 0; i < n + 2; ++i)
+		for (int k = 0; k < m + 2; ++k) {
+			rects[i][k] = RectangleShape(Vector2f(size, size));
+			rects[i][k].setPosition(size * k , size * i  );
+		}
+
+	update(window, rects);
 
 	while (window.isOpen())	{
 
@@ -159,12 +203,38 @@ void show() {
 
 			case Event::MouseButtonPressed:
 				if (event.mouseButton.button == Mouse::Left) {
-					if (!restart) {
-						printarr = arr;
-						restart = true;
-					}
-					flip(event.mouseButton.y / size, event.mouseButton.x / size);
-				} else if (event.mouseButton.button == Mouse::Right && restart) {
+					Vector2i pos1(-1, -1), pos2;
+					do {
+						pos2 = pos1;
+						pos1 = Mouse::getPosition(window) / size;
+						if (!restart) {
+							printarr = arr;
+							restart = true;
+						}
+						if (pos1 != pos2) {
+							(state) ? wall(pos1.y, pos1.x) : empty(pos1.y, pos1.x);
+							update(window, rects);
+						}
+
+					} while (Mouse::isButtonPressed(Mouse::Left));
+				}
+				break;
+			case Event::KeyPressed:
+				if (event.key.code == Keyboard::C) {
+
+					for (int i = 0; i <= n + 1; ++i)
+						for (int k = 0; k <= m + 1; ++k)
+							if (i * k == 0 || i == n + 1 || k == m + 1)
+								arr[i][k] = n * m + 1;
+							else
+								arr[i][k] = 0;
+
+					printarr = arr;
+					fill(sarr.begin(), sarr.end(), arr);
+					update(window, rects);
+				} else if (event.key.code == Keyboard::M)
+					state = !state;
+				else if (event.key.code == Keyboard::Space && restart) {
 					restart = false;
 
 					arr = printarr;
@@ -174,35 +244,15 @@ void show() {
 
 					if (lvl != grens + 1)
 						calcpath(x0, my_y0, lvl);
+
+					update(window, rects);
 				}
+
 				break;
+
 			}
 		}
 
-		window.clear(Color::Black);
-
-		for (int i = 0; i < n + 2; ++i)
-			for (int k = 0; k < m + 2; ++k) {
-				rects[i][k] = RectangleShape(Vector2f(size, size));
-				rects[i][k].setPosition(size * k , size * i  );
-
-				Color clr;
-
-				if ((i == x0 && k == my_y0) || (i == x1 && k == my_y1))
-					clr = Color::Black;
-				else if (printarr[i][k] >= n * m)
-					clr = Color::Blue;
-				else if (printarr[i][k] == -1)
-					clr = Color::Green;
-				else if (printarr[i][k] == -2)
-					clr = Color::Yellow;
-				else
-					clr = Color::White;
-				rects[i][k].setFillColor(clr);
-				window.draw(rects[i][k]);
-			}
-
-		window.display();
 	}
 }
 
