@@ -26,5 +26,5 @@ int main() {
 
   	std::chrono::duration<double> elapsed_seconds = end-start;
 
-	cout << '\n' << "Price: " << mp << '\n' << "Time elapsed: " << elapsed_seconds.count() << " sec.\n";
+	cout << "\nPrice: " << mp << "\nTime elapsed: " << elapsed_seconds.count() << " sec.\n";
 }
