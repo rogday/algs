@@ -71,7 +71,7 @@ int main(int argv, char *str[]) {
   Mat res(height, width, CV_8UC3), img(height, width, CV_8UC3);
 
   while (cam.read(img))
-    parallelize(fmap, ref(img), ref(vec));
+    parallelize(fmap, img, vec);
 
   VideoWriter video;
   video.open("out.avi", VideoWriter::fourcc('H', '2', '6', '4'), 30.0,
@@ -82,7 +82,7 @@ int main(int argv, char *str[]) {
     video << img;
   }
 
-  parallelize(fhist, ref(res), ref(vec));
+  parallelize(fhist, res, vec);
 
   stringstream ss;
   ss << "test_" << width << 'x' << height << ".png";
