@@ -31,7 +31,7 @@ void fhist(Mat &img, vector<Mat> &vec, int num) {
               [](int i, int k, int ch, Mat &img, vector<Mat> &vec) {
                 int ind = 0;
                 for (int j = 0; j < 256; ++j)
-                  if (vec[ind].at<Vec3b>(i, k)[ch] < vec[j].at<Vec3s>(i, k)[ch])
+                  if (vec[ind].at<Vec3s>(i, k)[ch] < vec[j].at<Vec3s>(i, k)[ch])
                     ind = j;
                 img.at<Vec3b>(i, k)[ch] = ind;
               });
