@@ -15,14 +15,14 @@ int main() {
       cin >> k;
 
   vector<int> vec(n + 1);
-  generate(vec.begin(), vec.end() - 1, [n = 0]() mutable { return n++; });
+  generate(vec.begin(), vec.end() - 1, [m = 0]() mutable { return m++; });
 
   int sum, msum = INT32_MAX;
 
   do {
     sum = 0;
     for (size_t i = 0; i < n; ++i)
-      if (arr[vec[i]][vec[i + 1]] != 0)
+      if (sum < msum)
         sum += arr[vec[i]][vec[i + 1]];
       else {
         sum = INT32_MAX;
