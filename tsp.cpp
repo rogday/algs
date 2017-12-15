@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <cmath>
 #include <iostream>
 #include <vector>
 
@@ -19,7 +18,6 @@ int main() {
   generate(vec.begin(), vec.end() - 1, [m = 0]() mutable { return m++; });
 
   int sum, msum = INT32_MAX;
-  long long cnt = 0, mcnt = tgamma(n) / 2;
 
   do {
     sum = 0;
@@ -33,9 +31,7 @@ int main() {
 
     if (msum > sum)
       msum = sum;
-
-    next_permutation(vec.begin() + 1, vec.end() - 1);
-  } while (++cnt < mcnt);
+  } while (next_permutation(vec.begin() + 1, vec.end() - 1));
 
   cout << msum;
 }
