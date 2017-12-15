@@ -8,14 +8,14 @@ int main() {
   int n;
   cin >> n;
 
-  vector<vector<int>> arr(n, vector<int>(n));
+  int arr[16][16], vec[17];
 
-  for (auto &i : arr)
-    for (auto &k : i)
-      cin >> k;
+  for (size_t i = 0; i < n; ++i)
+    for (size_t k = 0; k < n; ++k)
+      cin >> arr[i][k];
 
-  vector<int> vec(n + 1);
-  generate(vec.begin(), vec.end() - 1, [m = 0]() mutable { return m++; });
+  generate(vec, vec + n, [m = 0]() mutable { return m++; });
+  vec[n] = 0;
 
   int sum, msum = INT32_MAX;
 
@@ -31,7 +31,7 @@ int main() {
 
     if (msum > sum)
       msum = sum;
-  } while (next_permutation(vec.begin() + 1, vec.end() - 1));
+  } while (next_permutation(vec + 1, vec + n));
 
   cout << msum;
 }
