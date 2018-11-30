@@ -79,7 +79,7 @@ void print(uint num) {
 	std::cout << std::endl;
 }
 
-std::stack<uint> func(uint ians, uint iins) {
+std::stack<uint> solve(uint ians, uint iins) {
 	std::unordered_map<uint, uint> arr;
 	arr.reserve(362880); // 9!
 
@@ -152,7 +152,7 @@ int main() {
 	uint iins = convert(instr);
 
 	auto t1 = std::chrono::system_clock::now();
-	std::stack<uint> stk = func(ians, iins);
+	std::stack<uint> stk = solve(ians, iins);
 	auto t2 = std::chrono::system_clock::now();
 
 	std::chrono::duration<double> elapsed = t2 - t1;
